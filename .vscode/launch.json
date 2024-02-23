@@ -13,6 +13,7 @@
                 "books:app",
                 "--reload"
             ],
+            "cwd": "${workspaceFolder}/project1",
             "jinja": true
         }
     ]
