@@ -50,6 +50,21 @@ class BookRequest(BaseModel):
 async def get_all_books():
     return BOOKS
 
+@app.get("/books/{book_id}")
+async def get_book_by_id(book_id: int):
+    for book in BOOKS:
+        if book.id == book_id:
+            return book
+        
+@app.get("/books/")
+async def get_books_by_rating(rating: int):
+    results = []
+    for book in BOOKS:
+        if book.rating == rating:
+            results.append(book)
+
+    return results
+
 @app.post("/create-book")
 async def create_book(book_request: BookRequest):
     new_book = Book(**book_request.model_dump())
@@ -59,3 +74,16 @@ def find_book_id(book: Book):
 
     book.id = 1 if len(BOOKS) == 0 else BOOKS[-1].id + 1
     return book
+
+@app.put("/update_book")
+async def update_book(book: BookRequest):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book.id:
+            BOOKS[i] = book
+
+@app.delete("/books/{book_id}")
+async def delete_book(book_id: int):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].id == book_id:
+            BOOKS.pop(i)
+            break
