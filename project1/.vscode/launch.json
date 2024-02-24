@@ -10,9 +10,10 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "books:app",
+                "main:app",
                 "--reload"
             ],
+            "cwd": "${workspaceFolder}/project2",
             "jinja": true
         }
     ]
