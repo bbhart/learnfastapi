@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Query
 from pydantic import BaseModel, Field
 
 app = FastAPI()
@@ -10,22 +10,24 @@ class Book:
     author: str
     description: str
     rating: int
+    published_year: int
 
-    def __init__(self, id, title, author, description, rating):
+    def __init__(self, id, title, author, description, rating, published_year):
         self.id = id
         self.title = title
         self.author = author
         self.description = description
         self.rating = rating
+        self.published_year = published_year
 
 
 BOOKS = [
-    Book(1, 'Computer Science Pro', 'codingwithroby', 'A very nice book!', 5),
-    Book(2, 'Be Fast with FastAPI', 'codingwithroby', 'A great book!', 5),
-    Book(3, 'Master Endpoints', 'codingwithroby', 'A awesome book!', 5),
-    Book(4, 'HP1', 'Author 1', 'Book Description', 2),
-    Book(5, 'HP2', 'Author 2', 'Book Description', 3),
-    Book(6, 'HP3', 'Author 3', 'Book Description', 1)
+    Book(1, 'Computer Science Pro', 'codingwithroby', 'A very nice book!', 5, 2012),
+    Book(2, 'Be Fast with FastAPI', 'codingwithroby', 'A great book!', 5, 2019),
+    Book(3, 'Master Endpoints', 'codingwithroby', 'A awesome book!', 5, 2022),
+    Book(4, 'HP1', 'Author 1', 'Book Description', 2, 2019),
+    Book(5, 'HP2', 'Author 2', 'Book Description', 3, 2003),
+    Book(6, 'HP3', 'Author 3', 'Book Description', 1, 2001)
 ]
 
 class BookRequest(BaseModel):
@@ -34,6 +36,7 @@ class BookRequest(BaseModel):
     author: str = Field(min_length=1)
     description: str = Field(min_length=1, max_length=100)
     rating: int = Field(gt=0, lt=6)
+    published_year: int = Field(gt=0, lt=3000)
 
     class Config:
         json_schema_extra = {
@@ -42,6 +45,7 @@ class BookRequest(BaseModel):
                 'author': 'Famous author',
                 'description': 'Excellent book',
                 'rating': 3,
+                'published_year': 2024,
             }
         }
     
@@ -51,16 +55,25 @@ async def get_all_books():
     return BOOKS
 
 @app.get("/books/{book_id}")
-async def get_book_by_id(book_id: int):
+async def get_book_by_id(book_id: int = Path(gt=0)):
     for book in BOOKS:
         if book.id == book_id:
             return book
         
 @app.get("/books/")
-async def get_books_by_rating(rating: int):
+async def get_books_by_rating(rating: int = Query(gt=0,lt=6)):
     results = []
     for book in BOOKS:
         if book.rating == rating:
+            results.append(book)
+
+    return results
+
+@app.get("/books/published_year/{published_year}")
+async def get_books_by_published_year(published_year: int):
+    results = []
+    for book in BOOKS:
+        if book.published_year == published_year:
             results.append(book)
 
     return results
@@ -82,7 +95,7 @@ async def update_book(book: BookRequest):
             BOOKS[i] = book
 
 @app.delete("/books/{book_id}")
-async def delete_book(book_id: int):
+async def delete_book(book_id: int = Path(gt=0)):
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book_id:
             BOOKS.pop(i)
