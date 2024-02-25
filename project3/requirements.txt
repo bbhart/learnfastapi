@@ -1,0 +1,5 @@
+fastapi
+redis
+sqlalchemy
+types-redis
+uvicorn

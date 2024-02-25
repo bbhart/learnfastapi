@@ -13,7 +13,6 @@
                 "main:app",
                 "--reload"
             ],
-            "cwd": "${workspaceFolder}/project3",
             "jinja": true
         }
     ]
